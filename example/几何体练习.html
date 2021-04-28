@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script type="module">
+      import * as THREE from "../build/three.module.js";
+      import { OrbitControls } from './jsm/controls/OrbitControls.js';
+      let scene, light,mesh;
+      let camera, renderer;
+
+      init();
+
+      function init() {
+        //创建场景
+        scene = new THREE.Scene();
+
+        //创建几何体
+        var geometry = new THREE.BoxGeometry(40,40,40);
+        var material = new THREE.MeshLambertMaterial({
+            color:0x00ff00
+        });
+        mesh = new THREE.Mesh(geometry,material);
+        scene.add(mesh);
+        // 光源
+        var point = new THREE.PointLight(0x444444);
+        point.position.set(100,0,0);
+        scene.add(point);
+
+        var ambient = new THREE.AmbientLight(0x444444);
+        scene.add(ambient);
+
+
+        camera = new THREE.PerspectiveCamera(
+          30,
+          window.innerWidth / window.innerHeight,
+          1,
+          10000
+        );
+        camera.position.set(500, 500, 500);
+        camera.lookAt(scene.position);
+        renderer = new THREE.WebGLRenderer();
+        renderer.setClearColor(0xb9d3ff,1);
+        renderer.setSize(window.innerWidth,window.innerHeight);
+        
+        //辅助坐标系
+        var axisHelper = new THREE.AxisHelper(250);
+        scene.add(axisHelper);
+        document.body.appendChild(renderer.domElement);
+        const control = new OrbitControls(camera,renderer.domElement);
+        // control.addEventListener('change',render)
+      }
+      function render(){
+        renderer.render(scene, camera);
+        // mesh.rotateZ(0.015);
+        const time = performance.now() * 0.0001;
+        mesh.rotateY(Math.sin(time));
+        // mesh.rotateX(0.001);
+        // mesh.translateZ(Math.sin(time)); 
+        requestAnimationFrame(render);
+      }
+      render();
+    </script>
+  </body>
+</html>
