@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>各种几何体旋转</title>
+    <link type="css/x-scss" rel="stylesheet" href="main.scss">
+</head>
+<body>
+    <script type="module">
+        import * as THREE from "../build/three.module.js";
+        import Stats from "./jsm/libs/stats.module.js";
+
+        let scene,camera,renderer,stats;
+
+        init();
+        animate();
+
+        function init(){
+
+            camera = new THREE.PerspectiveCamera(45,window.innerWidth/window.innerHeight,1,2000);
+            camera.position.y = 400;
+
+            scene = new THREE.Scene();
+
+            let object;
+
+            const ambientLight = new THREE.AmbientLight(0xcccccc,0.4);
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0xffffff,0.8);
+            camera.add(pointLight);
+            scene.add(pointLight);
+            scene.add(camera);
+            const map = new THREE.TextureLoader().load('textures/UV_Grid_Sm.jpg');
+            map.wrapS = map.wrapT = THREE.RepeatWrapping;
+            map.anisotorpy = 16;
+
+            const material = new THREE.MeshPhongMaterial({map:map,side:THREE.DoubleSide});
+            /*
+            球体
+            构造函数 SphereGeometry()
+            参数：1、球体半径 2、水平分段数（最小值为2，默认值为8）3、垂直分段数（最小值为3，默认值为6）
+                4-7 用来创建不完整的球体 暂时还没用上
+            */
+            object = new THREE.Mesh(new THREE.SphereGeometry(75,20,10),material);
+            object.position.set(-300,0,200);
+            scene.add(object);
+            /*
+            二十面体
+            构造函数 IcosahedronGeometry()
+            参数：1、二十面体的半径 2、设置为1时将变成一个球体，默认值为0；
+            */
+            object = new THREE.Mesh(new THREE.IcosahedronGeometry(75,0),material);
+            object.position.set(-100,0,200);
+            scene.add(object);
+            /*
+            八面缓冲几何体
+            构造函数 OctahedronGeometry()
+            参数：1、八面体的半径 2、增加顶点数（好像会变成球) default:0
+            */
+            object = new THREE.Mesh(new THREE.OctahedronGeometry(75,0),material);
+            object.position.set(100,0,200);
+            scene.add(object);
+            /*
+            四面缓冲几何体
+            构造函数 TetrahedronGeometry()
+            参数：1、四面几何体半径 2、增加的顶点数
+            */
+            object = new THREE.Mesh(new THREE.TetrahedronGeometry(75,0),material);
+            object.position.set(300,0,200);
+            scene.add(object);
+
+            /*
+            平面几何体
+            构造函数 PlaneGeometry()
+            参数：1、宽度 2、高度 3、平面宽分段数 4、平面高度分段数
+            */
+            object = new THREE.Mesh(new THREE.PlaneGeometry(100,100,4,4),material);
+            object.position.set(-300,0,0);
+            scene.add(object);
+
+            /*
+            立方缓冲几何体
+            构造函数 BoxGeometry()
+            参数：1、宽度 2、高度 3、深度 4、宽度分段数 5、高度分段数 6、深度分段数
+            */
+            object = new THREE.Mesh(new THREE.BoxGeometry(100,100,100,4,4,4),material);
+            object.position.set(-100,0,0);
+            scene.add(object);
+            /*
+            圆形几何体
+            构造函数 CircleGeometry()
+            参数：1、半径 2、三角形个数 3、第一个分段起始角度 4、中心区（2PI 构成一个圆，可做扇形）
+            */
+            object = new THREE.Mesh(new THREE.CircleGeometry(50,20,0,Math.PI*2),material);
+            object.position.set(100,0,0);
+            scene.add(object);
+            renderer = new THREE.WebGLRenderer({antialias:true});
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth,window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            stats = new Stats();
+            document.body.appendChild(stats.dom);
+
+
+        }
+        function animate(){
+            requestAnimationFrame(animate);
+            render();
+            stats.update();
+        }
+        function render(){
+            const timer = Date.now()*0.0001;
+            camera.position.x = Math.cos(timer) * 800;
+            camera.position.z = Math.sin(timer) * 800;
+            
+            camera.lookAt(scene.position);
+            renderer.render(scene,camera);
+        }
+    </script>
+</body>
+</html>
