@@ -1,65 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>立方体随机</title>
-    <link type="text/x-scss" rel="stylesheet" href="main.css">
-</head>
-<body>
+    <link type="text/x-scss" rel="stylesheet" href="main.css" />
+  </head>
+  <body>
     <script type="module">
-        import * as THREE from "../build/three.module.js";
-        import Stats from "./jsm/libs/stats.module.js";
+      import * as THREE from "../build/three.module.js";
+      import Stats from "./jsm/libs/stats.module.js";
 
-        let container,stats;
-        let camera,scene,raycaster,renderer;
+      let container, stats;
+      let camera, scene, raycaster, renderer;
 
-        let INTERSECTED;
-        let theta = 0;
+      let INTERSECTED;
+      let theta = 0;
 
-        const pointer = new THREE.Vector2();
-        const radius = 100;
+      const pointer = new THREE.Vector2();
+      const radius = 100;
 
-        init();
-        animate();
+      init();
+      animate();
 
-        function init(){
-            container = document.createElement('div');
-            document.body.appendChild(container);
+      function init() {
+        container = document.createElement("div");
+        document.body.appendChild(container);
 
-            //安排相机
+        //安排相机
 
-            camera = new THREE.PerspectiveCamera(70,window.innerWidth/window.innerHeight,1,10000);
-            
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xf0f0f0);
+        camera = new THREE.PerspectiveCamera(
+          70,
+          window.innerWidth / window.innerHeight,
+          1,
+          10000
+        );
 
-            const light = new THREE.DirectionalLight(0xffffff,1);
-            light.position.set(1,1,1).normalize();
-            scene.add(light);
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf0f0f0);
 
-            const geometry = new THREE.BoxGeometry(20,20,20);
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(1, 1, 1).normalize();
+        scene.add(light);
 
-            for(let i = 0;i<2000;i++){
-                const object = new THREE.Mesh(geometry,new THREE.MeshLambertMaterial({color:Math.random() * 0xffffff}));
-                object.position.x = Math.random() * 800 -400;
-                object.position.y = Math.random() * 800 - 400;
-                object.position.z = Math.random() * 800 -400 ;
+        const geometry = new THREE.BoxGeometry(20, 20, 20);
 
-                object.rotation.x = Math.random() *2 *Math.PI;
-                object.rotation.y = Math.random() *2 *Math.PI;
-                object.rotation.z = Math.random() *2 *Math.PI;
-                
-                object.scale.x = Math.random() + 0.5;
-                object.scale.y = Math.random() + 0.5;
-                object.scale.z = Math.random() + 0.5;
-                scene.add(object);
-            }
-            raycaster = new Raycaster();
-            
+        for (let i = 0; i < 2000; i++) {
+          const object = new THREE.Mesh(
+            geometry,
+            new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff })
+          );
+          object.position.x = Math.random() * 800 - 400;
+          object.position.y = Math.random() * 800 - 400;
+          object.position.z = Math.random() * 800 - 400;
 
+          object.rotation.x = Math.random() * 2 * Math.PI;
+          object.rotation.y = Math.random() * 2 * Math.PI;
+          object.rotation.z = Math.random() * 2 * Math.PI;
+
+          object.scale.x = Math.random() + 0.5;
+          object.scale.y = Math.random() + 0.5;
+          object.scale.z = Math.random() + 0.5;
+          scene.add(object);
         }
+        raycaster = new THREE.Raycaster();
+
+        renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+
+        stats = new Stats();
+        container.appendChild(stats.dom);
+
+        document.addEventListener("mousemove", onPointerMove);
+
+        window.addEventListener("resize", onWindowResize);
+      }
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+      function onPointerMove(event) {
+        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+        pointer.y = (event.clientY / window.innerHeight) * 2 - 1;
+      }
+      function animate() {
+        requestAnimationFrame(animate);
+
+        render();
+
+        stats.update();
+      }
+
+      function render() {
+        theta += 0.1;
+
+        camera.position.x = radius * Math.sin(THREE.MathUtils.degToRad(theta));
+        camera.position.y = radius * Math.sin(THREE.MathUtils.degToRad(theta));
+        camera.position.z = radius * Math.cos(THREE.MathUtils.degToRad(theta));
+
+        camera.lookAt(scene.position);
+
+        raycaster.setFromCamera(pointer, camera);
+
+        const intersects = raycaster.intersectObjects(scene.children);
+
+        if (intersects.length > 0) {
+          if (INTERSECTED != intersects[0].object) {
+            if (INTERSECTED)
+              INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+
+            INTERSECTED = intersects[0].object;
+            INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+            INTERSECTED.material.emissive.setHex(0xff0000);
+          }
+        } else {
+          if (INTERSECTED)
+            INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+
+          INTERSECTED = null;
+        }
+        renderer.render(scene, camera);
+      }
     </script>
-</body>
+  </body>
 </html>
