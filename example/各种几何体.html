@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>各种几何体旋转</title>
-    <link type="css/x-scss" rel="stylesheet" href="main.scss">
+    <link type="text/css" rel="stylesheet" href="main.css">
+    <style>
+        
+    </style>
 </head>
 <body>
     <script type="module">
@@ -97,6 +99,57 @@
             object = new THREE.Mesh(new THREE.CircleGeometry(50,20,0,Math.PI*2),material);
             object.position.set(100,0,0);
             scene.add(object);
+
+            /*
+            圆环几何体
+            构造函数 RingGeometry
+            参数：1、内部半径 2、外部半径 3、圆环分段数 default：8 4、每个面的三角形个数 5、起始角度 6、圆心角
+            */
+            object = new THREE.Mesh(new THREE.RingGeometry(10,50,20,5,0,Math.PI*2),material);
+            object.position.set(300,0,0);
+            scene.add(object);
+
+            /*
+            圆柱几何体
+            构造函数 CylinderGeometry()
+            参数：1、圆柱顶部半径 2、圆柱底部半径 3、
+            */
+            object = new THREE.Mesh(new THREE.CylinderGeometry(25,75,100,40,5),material);
+            object.position.set(-300,0,-200);
+            scene.add(object);
+
+            /*
+            车削缓冲几何体
+            构造函数 LatheGeometry()
+            参数：1、Vector2 对象数组，x轴必须大于0 2、分段数 3、弧度 4、圆心角 控制几何体是否完整
+            */
+            const points = [];
+
+            for(let i=0;i<50;i++){
+                points.push(new THREE.Vector2(Math.sin(i*0.2)*Math.sin(i*0.1)*15+50,(i-5)*2));
+            }
+            object = new THREE.Mesh(new THREE.LatheGeometry(points,20),material);
+            object.position.set(-100,0,-200);
+            scene.add(object);
+
+            /*
+            圆环缓冲几何体
+            构造函数 TorusGeometry()
+            参数：1、圆环的半径 2、管道的半径 3、圆环的分段数 4、管道的分段数 5、圆心角
+            */
+            object = new THREE.Mesh(new THREE.TorusGeometry(50,20,20,20),material);
+            object.position.set(100,0,-200);
+            scene.add(object);
+
+            /*
+            圆环缓冲扭结几何体
+            构造函数 TorusKnotGeometry()
+            参数：1、圆环的半径 2、管道的半径 3、管道的分段数 4、圆环的分段数 5、绕着轴对称旋转多少次 6、绕着内部圆环旋转多少次
+            */
+            object = new THREE.Mesh(new THREE.TorusKnotGeometry(50,10,50,20),material);
+            object.position.set(300,0,-200);
+            scene.add(object);
+
             renderer = new THREE.WebGLRenderer({antialias:true});
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth,window.innerHeight);
@@ -104,6 +157,14 @@
 
             stats = new Stats();
             document.body.appendChild(stats.dom);
+
+            window.addEventListener('resize',onWindowResize);
+        }
+        function onWindowResize(){
+            camera.aspect = window.innerWidth/window.innerHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(window.innerWidth,window.innerHeight);
 
 
         }
@@ -118,6 +179,14 @@
             camera.position.z = Math.sin(timer) * 800;
             
             camera.lookAt(scene.position);
+
+            scene.traverse((object)=>{
+                if(object.isMesh){
+                    object.rotation.x = timer*5;
+                    object.rotation.y = timer *2.5;
+                }
+            })
+
             renderer.render(scene,camera);
         }
     </script>
